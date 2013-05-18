@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
@@ -23,6 +24,17 @@ namespace Officers
 			// To disable tracing in your application, please comment out or remove the following line of code
 			// For more information, refer to: http://www.asp.net/web-api
 			config.EnableSystemDiagnosticsTracing();
+
+
+			// Remove xml formatter - we prefer JSON
+			config.Formatters.Remove(config.Formatters.XmlFormatter);
+
+			// Convert api data to camel-cased property names
+			var jsonFormatter = config.Formatters.JsonFormatter;
+			jsonFormatter.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+
+			// Enable indented ("pretty") formatting of Json output for debug only
+			jsonFormatter.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
 		}
 	}
 }

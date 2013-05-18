@@ -1,4 +1,5 @@
 ﻿using Officers.Models;
+using Raven.Client.Document;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,24 +11,52 @@ namespace Officers.Controllers
 {
 	public class OfficersController : ApiController
 	{
+		private readonly DocumentStore documentStore;
+
+		public OfficersController()
+		{
+			documentStore = new DocumentStore { Url = "http://localhost:8080/", DefaultDatabase = "DNUG" };
+			documentStore.Initialize();
+		}
+
 		public IEnumerable<Officer> Get()
 		{
-			return new Officer[] { new Officer() { Id = 1, FirstName = "David", LastName = "Schlum" }, new Officer() { Id = 2, FirstName = "Tim", LastName = "Franklin"} };
+			using (var session = documentStore.OpenSession())
+			{
+				return session.Query<Officer>().ToList();
+			}
 		}
 
 		public Officer Get(int id)
 		{
-			return new Officer() { Id = 1, FirstName = "David", LastName = "Schlum" };
+			using (var session = documentStore.OpenSession())
+			{
+				return session.Load<Officer>(id);
+			}
 		}
 
-		public Officer Post([FromBody]Officer officer)
+		public HttpResponseMessage Post([FromBody]Officer officer)
 		{
-			officer.Id = new Random().Next();
+			using (var session = documentStore.OpenSession())
+			{
+				session.Store(officer);
+				session.SaveChanges();
+			}
+			var response = Request.CreateResponse<Officer>(HttpStatusCode.Created, officer);
+			string uri = Url.Link("DefaultApi", new { id = officer.Id });
+			response.Headers.Location = new Uri(uri);
+			return response;
+		}
+
+		public Officer Put(int id, [FromBody]Officer officer)
+		{
+			officer.Id = id;
+			using (var session = documentStore.OpenSession())
+			{
+				session.Store(officer);
+				session.SaveChanges();
+			}
 			return officer;
-		}
-
-		public void Put(int id, [FromBody]Officer value)
-		{
 		}
 
 		public void Delete(int id)
