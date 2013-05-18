@@ -63,9 +63,7 @@
                     <ul class="nav nav-list">
                         <li class="nav-header">Current Officers</li>
                     </ul>
-                    <ul class="nav nav-list">
-                        <li class="active"><a href="#">Officer 1</a></li>
-                        <li><a href="#">Officer 2</a></li>
+                    <ul id="officer-list" class="nav nav-list">
                     </ul>
                 </div>
                 <!--/.well -->
@@ -111,10 +109,14 @@
             </div>
             <div class="control-group">
                 <div class="controls">
-                    <button type="submit" class="btn">Save</button>
+                    <button id="save-button" type="submit" class="btn">Save</button>
                 </div>
             </div>
         </form>
+    </script>
+
+    <script type="text/template" id="officer-item-template">
+        <%= firstName %> <%= lastName %>
     </script>
 
     <script src="Scripts/jquery-1.9.1.js"></script>
