@@ -3,7 +3,11 @@
 $(function () {
 
     app.OfficerModel = Backbone.Model.extend({
-        urlRoot: 'api/officers'
+        urlRoot: 'api/officers',
+        defaults: {
+            'firstName': '',
+            'lastName': '',
+        }
     });
 
     app.OfficerCollection = Backbone.Collection.extend({
@@ -23,22 +27,51 @@ $(function () {
     app.OfficerForm = Backbone.View.extend({
         el: '#content',
         template: _.template($('#officer-form').html()),
+        initialize: function (options) {
+            if (options.mode) {
+                this.model.set('mode', options.mode);
+            }
+        },
         render: function () {
-            this.$el.html(this.template());
+            this.$el.html(this.template(this.model.toJSON()));
             return this;
         },
         events: {
-            'click #save-button': 'save'
+            'click #elect-button': 'elect',
         },
-        save: function () {
+        elect: function (e) {
+            console.log(this.model);
+            e.preventDefault();
             var self = this;
-            this.model.set({ 'firstName': $('#firstName').val(), 'lastName': $('#lastName').val() });
+            this.model.set({ 'firstName': $('#firstName').val(), 'lastName': $('#lastName').val(), 'office': $('#office').val() });
             this.model.save()
             .done(function () {
-                console.log(self.model);
                 app.officers.add(self.model);
-                Backbone.history.navigate('officers/' + self.model.get('id'), true);
+                Backbone.history.navigate('#officers/' + self.model.get('id'), true);
+                self.stopListening();
             });
+        }
+    });
+
+    app.OfficerDetailsView = Backbone.View.extend({
+        el: '#content',
+        template: _.template($('#officer-detail').html()),
+        render: function () {
+            this.$el.html(this.template(this.model.toJSON()));
+            return this;
+        },
+        events: {
+            'click #edit-button': 'editMe',
+            'click #impeach-button': 'impeach'
+        },
+        editMe: function () {
+            Backbone.history.navigate('#officers/' + this.model.get('id') + '/edit', true);
+        },
+        impeach: function () {
+            var resp = confirm('Are you sure you want to impeach ' + this.model.get('firstName') + '?');
+            if (resp) {
+                console.log('start impeachment process');
+            }
         }
     });
 
@@ -59,10 +92,15 @@ $(function () {
         el: '#officer-list',
         initialize: function () {
             this.listenTo(app.officers, 'add', this.addOne);
+            this.listenTo(app.officers, 'reset', this.addAll);
         },
         addOne: function (officer) {
             var itemView = new app.OfficerItemView({ model: officer });
             $('#officer-list').append(itemView.render().el);
+        },
+        addAll: function () {
+            $('#officer-list').html('');
+            app.officers.each(this.addOne, this);
         }
     });
 
@@ -78,26 +116,36 @@ $(function () {
             var hero = new app.HeroView();
             hero.render();
         },
-        displayOfficer: function () {
-
-            console.log('put display here');
+        displayOfficer: function (id) {
+            var officer = app.officers.get(id);
+            var view = new app.OfficerDetailsView({ model: officer });
+            view.render();
         },
         newOfficer: function () {
-            var form = new app.OfficerForm({ model: new app.OfficerModel() });
+            // TODO:  Use single form instance and pass in the two options to the render method?
+            var form = new app.OfficerForm({ mode: 'new', model: new app.OfficerModel() });
             form.render();
         },
         editOfficer: function (id) {
-            var form = new app.OfficerForm();
+            var officer = app.officers.get(id);
+            var form = new app.OfficerForm({ mode: 'edit', model: officer });
             form.render();
         }
     });
 
     app.officers = new app.OfficerCollection();
+    app.officers.fetch({ reset: true })
+    .done(function () {
+        app.officerListView = new app.OfficerListView({ collection: app.officers });
+        app.officerListView.render();
+        app.officerListView.addAll();
 
-    app.officerListView = new app.OfficerListView();
-    app.officerListView.render();
+        app.officerForm = new OfficerForm();
 
-    app.appRouter = new AppRouter();
-    Backbone.history.start();
+        app.appRouter = new AppRouter();
+        Backbone.history.start();
+    });
+
+    
 
 });

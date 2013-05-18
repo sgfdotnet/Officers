@@ -93,30 +93,53 @@
         </div>
     </script>
 
+    <script type="text/template" id="officer-detail">
+        <h3><%= firstName %> <%= lastName %></h3>
+        <h4><%= office %> since 5/?/2013</h4>
+        <button id="edit-button" class="btn">Edit</button>
+        <button id="impeach-button" class="btn btn-danger">Impeach</button>
+    </script>
+
     <script type="text/template" id="officer-form">
-        <form class="form-horizontal">
+        <% if (mode === 'new') { %>
+        <h2>Elect a New Officer</h2>
+        <% } else { %>
+        <h2>Edit an Officer</h2>
+        <% } %>
+        <form class="form-horizontal" action="#">
             <div class="control-group">
                 <label class="control-label" for="firstName">First Name</label>
                 <div class="controls">
-                    <input type="text" id="firstName" placeholder="First Name">
+                    <input type="text" id="firstName" placeholder="First Name" value="<%= firstName %>" />
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label" for="lastName">Last Name</label>
                 <div class="controls">
-                    <input type="text" id="lastName" placeholder="Last Name">
+                    <input type="text" id="lastName" placeholder="Last Name" value="<%= lastName %>" />
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="office">Office</label>
+                <div class="controls">
+                    <select id="office" name="office">
+                        <option></option>
+                        <option>President</option>
+                        <option>Vice President</option>
+                        <option>Minister of Propaganda</option>
+                    </select>
                 </div>
             </div>
             <div class="control-group">
                 <div class="controls">
-                    <button id="save-button" type="submit" class="btn">Save</button>
+                    <button id="elect-button" type="submit" class="btn btn-primary">Elect</button>
                 </div>
             </div>
         </form>
     </script>
 
     <script type="text/template" id="officer-item-template">
-        <%= firstName %> <%= lastName %>
+        <a href="#/officers/<%= id %>"><%= firstName %> <%= lastName %></a>
     </script>
 
     <script src="Scripts/jquery-1.9.1.js"></script>
