@@ -27,12 +27,11 @@ $(function () {
     app.OfficerForm = Backbone.View.extend({
         el: '#content',
         template: _.template($('#officer-form').html()),
-        initialize: function (options) {
+        render: function (options) {
+            this.model = options.model;
             if (options.mode) {
                 this.model.set('mode', options.mode);
             }
-        },
-        render: function () {
             this.$el.html(this.template(this.model.toJSON()));
             return this;
         },
@@ -123,13 +122,13 @@ $(function () {
         },
         newOfficer: function () {
             // TODO:  Use single form instance and pass in the two options to the render method?
-            var form = new app.OfficerForm({ mode: 'new', model: new app.OfficerModel() });
-            form.render();
+            //var form = new app.OfficerForm({ mode: 'new', model: new app.OfficerModel() });
+            app.officerForm.render({ mode: 'new', model: new app.OfficerModel() });
         },
         editOfficer: function (id) {
             var officer = app.officers.get(id);
-            var form = new app.OfficerForm({ mode: 'edit', model: officer });
-            form.render();
+            //var form = new app.OfficerForm({ mode: 'edit', model: officer });
+            app.officerForm.render({ mode: 'edit', model: officer });
         }
     });
 
@@ -140,7 +139,7 @@ $(function () {
         app.officerListView.render();
         app.officerListView.addAll();
 
-        app.officerForm = new OfficerForm();
+        app.officerForm = new app.OfficerForm();
 
         app.appRouter = new AppRouter();
         Backbone.history.start();
