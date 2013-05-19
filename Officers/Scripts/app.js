@@ -39,7 +39,6 @@ $(function () {
             'click #elect-button': 'elect',
         },
         elect: function (e) {
-            console.log(this.model);
             e.preventDefault();
             var self = this;
             this.model.set({ 'firstName': $('#firstName').val(), 'lastName': $('#lastName').val(), 'office': $('#office').val() });
@@ -55,7 +54,8 @@ $(function () {
     app.OfficerDetailsView = Backbone.View.extend({
         el: '#content',
         template: _.template($('#officer-detail').html()),
-        render: function () {
+        render: function (options) {
+            this.model = options.model;
             this.$el.html(this.template(this.model.toJSON()));
             return this;
         },
@@ -69,7 +69,10 @@ $(function () {
         impeach: function () {
             var resp = confirm('Are you sure you want to impeach ' + this.model.get('firstName') + '?');
             if (resp) {
-                console.log('start impeachment process');
+                this.model.destroy()
+                .done(function () {
+                    Backbone.history.navigate('#', true);
+                });
             }
         }
     });
@@ -112,23 +115,18 @@ $(function () {
             'officers/:id/edit': 'editOfficer'
         },
         showHero: function () {
-            var hero = new app.HeroView();
-            hero.render();
+            app.views.hero.render();
         },
         displayOfficer: function (id) {
             var officer = app.officers.get(id);
-            var view = new app.OfficerDetailsView({ model: officer });
-            view.render();
+            app.views.officerDetails.render({ model: officer });
         },
         newOfficer: function () {
-            // TODO:  Use single form instance and pass in the two options to the render method?
-            //var form = new app.OfficerForm({ mode: 'new', model: new app.OfficerModel() });
-            app.officerForm.render({ mode: 'new', model: new app.OfficerModel() });
+            app.views.officerForm.render({ mode: 'new', model: new app.OfficerModel() });
         },
         editOfficer: function (id) {
             var officer = app.officers.get(id);
-            //var form = new app.OfficerForm({ mode: 'edit', model: officer });
-            app.officerForm.render({ mode: 'edit', model: officer });
+            app.views.officerForm.render({ mode: 'edit', model: officer });
         }
     });
 
@@ -139,7 +137,11 @@ $(function () {
         app.officerListView.render();
         app.officerListView.addAll();
 
-        app.officerForm = new app.OfficerForm();
+        app.views = {
+            hero: new app.HeroView(),
+            officerForm: new app.OfficerForm(),
+            officerDetails: new app.OfficerDetailsView()
+        }
 
         app.appRouter = new AppRouter();
         Backbone.history.start();

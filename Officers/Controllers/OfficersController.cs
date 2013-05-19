@@ -61,6 +61,15 @@ namespace Officers.Controllers
 
 		public void Delete(int id)
 		{
+			using (var session = documentStore.OpenSession())
+			{
+				var officer = session.Load<Officer>(id);
+				if (officer != null)
+				{
+					session.Delete<Officer>(officer);
+					session.SaveChanges();
+				}
+			}
 		}
 	}
 }
