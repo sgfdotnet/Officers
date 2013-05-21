@@ -63,10 +63,43 @@ $(function () {
         }
     });
 
+    app.OfficerForm = Backbone.View.extend({
+        el: '#content',
+        template: _.template($('#officer-form').html()),
+        render: function (options) {
+            this.model = options.model;
+            if (options.mode) {
+                this.model.set('mode', options.mode);
+            }
+            this.$el.html(this.template(this.model.toJSON()));
+
+            if (options.mode === 'edit') {
+                $('#office').val(this.model.get('office'));
+                $('#elect-button').html('Re-elect');
+            }
+            return this;
+        },
+        events: {
+            'click #elect-button': 'elect',
+        },
+        elect: function (e) {
+            var self = this;
+            this.model.set({ 'firstName': $('#firstName').val(), 'lastName': $('#lastName').val(), 'office': $('#office').val() });
+            this.model.save()
+            .done(function () {
+                app.officers.add(self.model);
+                Backbone.history.navigate('#officers/' + self.model.get('id'), true);
+                self.stopListening();
+            });
+        }
+    });
+
     var AppRouter = Backbone.Router.extend({
         routes: {
             '': 'showHero',
-            'officers/:id': 'displayOfficer'
+            'officers/new': 'newOfficer',
+            'officers/:id': 'displayOfficer',
+            'officers/:id/edit': 'editOfficer'
         },
         showHero: function () {
             app.views.hero.render();
@@ -74,6 +107,13 @@ $(function () {
         displayOfficer: function (id) {
             var officer = app.officers.get(id);
             app.views.officerDetails.render({ model: officer });
+        },
+        newOfficer: function () {
+            app.views.officerForm.render({ mode: 'new', model: new app.OfficerModel() });
+        },
+        editOfficer: function (id) {
+            var officer = app.officers.get(id);
+            app.views.officerForm.render({ mode: 'edit', model: officer });
         }
     });
 
@@ -85,7 +125,8 @@ $(function () {
         app.views = {
             hero: new app.HeroView(),
             officerListView: new app.OfficerListView({ collection: app.officers }),
-            officerDetails: new app.OfficerDetailsView()
+            officerDetails: new app.OfficerDetailsView(),
+            officerForm: new app.OfficerForm()
         };
        
         app.views.hero.render();
