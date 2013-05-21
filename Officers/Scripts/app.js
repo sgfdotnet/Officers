@@ -63,19 +63,37 @@ $(function () {
         }
     });
 
+    var AppRouter = Backbone.Router.extend({
+        routes: {
+            '': 'showHero',
+            'officers/:id': 'displayOfficer'
+        },
+        showHero: function () {
+            app.views.hero.render();
+        },
+        displayOfficer: function (id) {
+            var officer = app.officers.get(id);
+            app.views.officerDetails.render({ model: officer });
+        }
+    });
+
 
     app.officers = new app.OfficerCollection();
     app.officers.fetch({ reset: true })
     .done(function () {
 
         app.views = {
-            showHero: new app.HeroView(),
-            officerListView: new app.OfficerListView({ collection: app.officers })
+            hero: new app.HeroView(),
+            officerListView: new app.OfficerListView({ collection: app.officers }),
+            officerDetails: new app.OfficerDetailsView()
         };
        
-        app.views.showHero.render();
+        app.views.hero.render();
         app.views.officerListView.render();
         app.views.officerListView.addAll();
+
+        app.appRouter = new AppRouter();
+        Backbone.history.start();
 
     });
 
