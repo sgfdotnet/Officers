@@ -53,6 +53,16 @@ $(function () {
         }
     });
 
+    app.OfficerDetailsView = Backbone.View.extend({
+        el: '#content',
+        template: _.template($('#officer-detail').html()),
+        render: function (options) {
+            this.model = options.model;
+            this.$el.html(this.template(this.model.toJSON()));
+            return this;
+        }
+    });
+
 
     app.officers = new app.OfficerCollection();
     app.officers.fetch({ reset: true })
