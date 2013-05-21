@@ -18,7 +18,9 @@ $(function () {
     
     app.officers = new app.OfficerCollection();
 
-    app.officers.fetch({ reset: true });
+    //app.officers.fetch({ reset: true });
 
+    // Seed a test record
+    app.officers.create({ firstName: 'David', lastName: 'Schlum', office: 'President' });
 
 });
