@@ -60,6 +60,22 @@ $(function () {
             this.model = options.model;
             this.$el.html(this.template(this.model.toJSON()));
             return this;
+        },
+        events: {
+            'click #edit-button': 'editMe',
+            'click #impeach-button': 'impeach'
+        },
+        editMe: function () {
+            Backbone.history.navigate('#officers/' + this.model.get('id') + '/edit', true);
+        },
+        impeach: function () {
+            var resp = confirm('Are you sure you want to impeach ' + this.model.get('firstName') + '?');
+            if (resp) {
+                this.model.destroy()
+                .done(function () {
+                    Backbone.history.navigate('#', true);
+                });
+            }
         }
     });
 
