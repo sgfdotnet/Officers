@@ -33,13 +33,17 @@ $(function () {
                 this.model.set('mode', options.mode);
             }
             this.$el.html(this.template(this.model.toJSON()));
+
+            if (options.mode === 'edit') {
+                $('#office').val(this.model.get('office'));
+                $('#elect-button').html('Re-elect');
+            }
             return this;
         },
         events: {
             'click #elect-button': 'elect',
         },
         elect: function (e) {
-            e.preventDefault();
             var self = this;
             this.model.set({ 'firstName': $('#firstName').val(), 'lastName': $('#lastName').val(), 'office': $('#office').val() });
             this.model.save()
